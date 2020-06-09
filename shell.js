@@ -28,12 +28,12 @@
 
 // enums will get exported
 
-var EXEC_STATE = {
+let EXEC_STATE = {
 	EDIT: "edit",
 	EXEC: "exec"
 };
 
-var PARSE_STATUS = {
+let PARSE_STATUS = {
 	NULL: "",
 	OK: "OK",
 	INCOMPLETE: "Incomplete",
@@ -62,27 +62,27 @@ const DEFAULT_PROMPT_CLASS = "shell-prompt";
  * function_key_callback: called on function keys (+ some others)
  *
  */
-var Shell = function( CodeMirror_, opts ){
+let Shell = function( CodeMirror_, opts ){
 
-	var cm;
-	var state = EXEC_STATE.EDIT;
-	var prompt_text = "";
-	var instance = this;
+	let cm;
+	let state = EXEC_STATE.EDIT;
+	let prompt_text = "";
+	let instance = this;
 	
-	var prompt_len = 0;
+	let prompt_len = 0;
 
-	var command_buffer = [];
-	var paste_buffer = [];
+	let command_buffer = [];
+	let paste_buffer = [];
 	
-	var unstyled_lines = [];
-	var block_reset = [];
+	let unstyled_lines = [];
+	let block_reset = [];
 	
-	var unstyled_flag = false;
-	var cached_prompt = null;
+	let unstyled_flag = false;
+	let cached_prompt = null;
 
-	var event_cache = null;
-	var event_cache_skip = false;
-	var event_playback = false;
+	let event_cache = null;
+	let event_cache_skip = false;
+	let event_playback = false;
 
 	/**
 	 * FIXME: cap and flush this thing at (X) number of lines
@@ -91,7 +91,7 @@ var Shell = function( CodeMirror_, opts ){
 	 * slightly, then down, up, modifications are retained.  reverts
 	 * on new command.
 	 */
-	var history = {
+	let history = {
 
 		current_line: null,
 		commands: [],
@@ -110,15 +110,15 @@ var Shell = function( CodeMirror_, opts ){
 		
 		save: function(opts){
 			opts = opts || {};
-			var max = opts.max || MAX_HISTORY_DEFAULT;
-			var key = opts.key || HISTORY_KEY_DEFAULT;
+			let max = opts.max || MAX_HISTORY_DEFAULT;
+			let key = opts.key || HISTORY_KEY_DEFAULT;
 			localStorage.setItem( key, JSON.stringify( this.actual_commands.slice(-max)));
 		},
 		
 		restore: function(opts){
 			opts = opts || {};
-			var key = opts.key || HISTORY_KEY_DEFAULT;
-			var val = localStorage.getItem(key);
+			let key = opts.key || HISTORY_KEY_DEFAULT;
+			let val = localStorage.getItem(key);
 			if( val ) this.actual_commands = JSON.parse( val );
 			this.reset_pointer();
 		},
@@ -165,7 +165,7 @@ var Shell = function( CodeMirror_, opts ){
 
 				token: function(stream, state) {
 					if( stream.sol()){
-						var lc = state.linecount;
+						let lc = state.linecount;
 						state.linecount++;
 						if( unstyled_flag || unstyled_lines[lc] ){
 							stream.skipToEnd();
@@ -223,7 +223,7 @@ var Shell = function( CodeMirror_, opts ){
 	};
 
 	/** cache events if we're blocking */
-	var cacheEvent = function(event){
+	let cacheEvent = function(event){
 		if( event_cache && !event_playback ){
 			if( event_cache_skip ){
 				if( event.type === "keyup" && event.key === "Enter" )
@@ -242,17 +242,17 @@ var Shell = function( CodeMirror_, opts ){
 	 * in that case, stop processing and dump all the 
 	 * original source events back into the cache. 
 	 */
-	var playbackEvents = function(){
+	let playbackEvents = function(){
 	
 		// flush cache.  set to null to act as flag
 		
-		var tmp = event_cache;
+		let tmp = event_cache;
 		event_cache = null;
 		event_cache_skip = false;
 		
 		if( tmp && tmp.length ){
 			
-			var inputTarget = cm.getInputField(); 
+			let inputTarget = cm.getInputField(); 
 			tmp.forEach( function( src ){
 
 				if( event_cache ){
@@ -260,7 +260,7 @@ var Shell = function( CodeMirror_, opts ){
 					return;
 				}
 
-				var event = new KeyboardEvent( src.type, src );
+				let event = new KeyboardEvent( src.type, src );
 				Object.defineProperties( event, {
 					charCode: { get: function(){ return src.charCode; }},
 					which: { get: function(){ return src.which; }},
@@ -291,9 +291,9 @@ var Shell = function( CodeMirror_, opts ){
 			return false;
 		}
 
-		var doc = cm.getDoc();
-		var lineno = doc.lastLine();
-		var line = doc.getLine( lineno );
+		let doc = cm.getDoc();
+		let lineno = doc.lastLine();
+		let line = doc.getLine( lineno );
 
 		if( !message ) message = "\n";
 		else message = "\n" + message + "\n";
@@ -303,7 +303,7 @@ var Shell = function( CodeMirror_, opts ){
 
 		state = EXEC_STATE.EXEC;
 
-		var command = line.substr(prompt_len);
+		let command = line.substr(prompt_len);
 		command_buffer.push(command);
 
 		if( command.trim().length > 0 ){
@@ -335,7 +335,7 @@ var Shell = function( CodeMirror_, opts ){
 			set_prompt( rslt.prompt || instance.opts.initial_prompt, rslt.prompt_class, rslt.continuation );
 		}
 		else {
-			var ps = rslt ? rslt.parsestatus || PARSE_STATUS.OK : PARSE_STATUS.NULL;
+			let ps = rslt ? rslt.parsestatus || PARSE_STATUS.OK : PARSE_STATUS.NULL;
 			if( ps === PARSE_STATUS.INCOMPLETE ){
 				set_prompt( instance.opts.continuation_prompt, undefined, true );
 			}
@@ -363,8 +363,8 @@ var Shell = function( CodeMirror_, opts ){
 	 */
 	this.insert_node = function(node, scroll){
 
-		var doc = cm.getDoc();
-		var line = Math.max( doc.lastLine() - 1, 0 );
+		let doc = cm.getDoc();
+		let line = Math.max( doc.lastLine() - 1, 0 );
 		cm.addLineWidget( line, node, {
 			handleMouseEvents: true
 		});
@@ -387,9 +387,9 @@ var Shell = function( CodeMirror_, opts ){
 	 */
 	this.response = function(text, className, unstyled){
 
-		var doc = cm.getDoc();
-		var lineno = doc.lastLine();
-		var end, start = lineno;
+		let doc = cm.getDoc();
+		let lineno = doc.lastLine();
+		let end, start = lineno;
 
 		if( text && typeof text !== "string" ){
 			try { text = text.toString(); }
@@ -402,15 +402,15 @@ var Shell = function( CodeMirror_, opts ){
 		// can handle \r (without a \n).  FIXME: if there's a prompt, go
 		// up one line.
 		
-		var lastline = doc.getLine(lineno);
-		var ch = lastline ? lastline.length : 0;
+		let lastline = doc.getLine(lineno);
+		let ch = lastline ? lastline.length : 0;
 
 		// second cut, a little more thorough
 		// one more patch, to stop breaking on windows CRLFs
 		
-		var lines = text.split( "\n" );
-		var replace_end = undefined;
-		var inline_replacement = false;
+		let lines = text.split( "\n" );
+		let replace_end = undefined;
+		let inline_replacement = false;
 
 		// fix here in case there's already a prompt (this is a rare case?)
 
@@ -426,7 +426,7 @@ var Shell = function( CodeMirror_, opts ){
 			// we can skip the loop.
 			
 			if( lines.length > 1 && block_reset.length ){
-				var blast = block_reset.length - 1 ;
+				let blast = block_reset.length - 1 ;
 				block_reset[ blast ] = undefined;
 				block_reset[ blast + lines.length - 1 ] = 1;
 			}
@@ -436,16 +436,16 @@ var Shell = function( CodeMirror_, opts ){
 		
 		text = "";
 		
-		for( var i = 0; i< lines.length; i++ ){
+		for( let i = 0; i< lines.length; i++ ){
 			
-			var overwrite = lines[i].split( '\r' );
+			let overwrite = lines[i].split( '\r' );
 			
 			if( i ) text += "\n";
 			else if( overwrite.length > 1 ) inline_replacement = true;
 			
 			if (overwrite.length > 1 ) {
-				var final_text = "";
-				for( var j = overwrite.length - 1; j >= 0; j-- ){
+				let final_text = "";
+				for( let j = overwrite.length - 1; j >= 0; j-- ){
 					final_text = final_text + overwrite[j].substring( final_text.length );
 				}
 				text += final_text;
@@ -464,13 +464,13 @@ var Shell = function( CodeMirror_, opts ){
 		doc.replaceRange( text, { line: start, ch: ch }, replace_end, "callback");
 		end = doc.lastLine();
 		lastline = doc.getLine(end);
-		var endch = lastline.length;
+		let endch = lastline.length;
 
 		if( unstyled ){
-			var u_end = end;
+			let u_end = end;
 			if( endch == 0 ) u_end--;
 			if( u_end >= start ){
-				for( var i = start; i<= u_end; i++ ) unstyled_lines[i] = 1;
+				for( let i = start; i<= u_end; i++ ) unstyled_lines[i] = 1;
 			}
 		}
 
@@ -510,9 +510,9 @@ var Shell = function( CodeMirror_, opts ){
 		if( up && history.pointer >= history.commands.length ) return;
 		if( !up && history.pointer == 0 ) return;
 
-		var doc = cm.getDoc();
-		var lineno = doc.lastLine();
-		var line = doc.getLine( lineno ).substr(prompt_len);
+		let doc = cm.getDoc();
+		let lineno = doc.lastLine();
+		let line = doc.getLine( lineno ).substr(prompt_len);
 
 		// capture current (see history class for note on soft persistence)
 		if( history.pointer == 0 ) history.current_line = line;
@@ -527,13 +527,13 @@ var Shell = function( CodeMirror_, opts ){
 			doc.replaceRange( history.current_line, { line: lineno, ch: prompt_len }, {line: lineno, ch: prompt_len + line.length }, "history");
 		}
 		else {
-			var text = history.commands[ history.commands.length - history.pointer ];
+			let text = history.commands[ history.commands.length - history.pointer ];
 			doc.replaceRange( text,
 				{ line: lineno, ch: prompt_len },
 				{ line: lineno, ch: prompt_len + line.length }, "history");
 		}
 
-		var linelen = cm.getLine( lineno ).length;
+		let linelen = cm.getLine( lineno ).length;
 
 		// after changing the text the caret should be at the end of the line
 		// (and the line should be in view)
@@ -558,9 +558,9 @@ var Shell = function( CodeMirror_, opts ){
 
 		prompt_text = text;	
 
-		var doc = cm.getDoc();				
-		var lineno = doc.lastLine();
-		var lastline = cm.getLine(lineno);
+		let doc = cm.getDoc();				
+		let lineno = doc.lastLine();
+		let lastline = cm.getLine(lineno);
 
 		if( !is_continuation ) block_reset[lineno] = 1;
 				
@@ -610,15 +610,15 @@ var Shell = function( CodeMirror_, opts ){
 			return;
 		}
 
-		var doc = cm.getDoc();
-		var lineno = doc.lastLine();
-		var line = doc.getLine( lineno );
+		let doc = cm.getDoc();
+		let lineno = doc.lastLine();
+		let line = doc.getLine( lineno );
 
 		doc.replaceRange( "\n", { line: lineno+1, ch: 0 }, undefined, "prompt");
 		doc.setCursor({ line: lineno+1, ch: 0 });
 
 		state = EXEC_STATE.EXEC;
-		var command;
+		let command;
 
 		if( cancel ){
 			command = "";
@@ -668,7 +668,7 @@ var Shell = function( CodeMirror_, opts ){
 					set_prompt( rslt.prompt || instance.opts.initial_prompt, rslt.prompt_class, rslt.continuation );
 				}
 				else {
-					var ps = rslt ? rslt.parsestatus || PARSE_STATUS.OK : PARSE_STATUS.NULL;
+					let ps = rslt ? rslt.parsestatus || PARSE_STATUS.OK : PARSE_STATUS.NULL;
 					if( ps === PARSE_STATUS.INCOMPLETE ){
 						set_prompt( instance.opts.continuation_prompt, undefined, true );
 					}
@@ -683,7 +683,7 @@ var Shell = function( CodeMirror_, opts ){
 				if( paste_buffer.length ){
 					
 					setImmediate( function(){
-						var text = paste_buffer[0];
+						let text = paste_buffer[0];
 						paste_buffer.splice(0,1);
 						doc.replaceRange( text, { line: lineno, ch: prompt_len }, undefined, "paste-continuation");
 						
@@ -712,8 +712,8 @@ var Shell = function( CodeMirror_, opts ){
 	 */
 	this.clear = function(focus){
 
-		var doc = cm.getDoc();
-		var lastline = doc.lastLine();
+		let doc = cm.getDoc();
+		let lastline = doc.lastLine();
 		if( lastline > 0 ){
 			doc.replaceRange( "", { line: 0, ch: 0 }, { line: lastline, ch: 0 });
 		}
@@ -725,7 +725,7 @@ var Shell = function( CodeMirror_, opts ){
 		block_reset.splice(0, block_reset.length);
 		
 		// move cursor to edit position 
-		var text = doc.getLine( doc.lastLine());
+		let text = doc.getLine( doc.lastLine());
 		doc.setSelection({ line: doc.lastLine(), ch: text.length });
 
 		// optionally focus		
@@ -756,10 +756,10 @@ var Shell = function( CodeMirror_, opts ){
 	 * get current line (peek)
 	 */
 	this.get_current_line = function(){
-		var doc = cm.getDoc();
-		var index = doc.lastLine();
-		var line = doc.getLine(index);
-		var pos = cm.getCursor();
+		let doc = cm.getDoc();
+		let index = doc.lastLine();
+		let line = doc.getLine(index);
+		let pos = cm.getCursor();
 		return { text: line.substr( prompt_len ),
 			pos: ( index == pos.line ? pos.ch - prompt_len : -1 )
 		 };
@@ -769,9 +769,9 @@ var Shell = function( CodeMirror_, opts ){
 	 * get line caret is on.  may include prompt.
 	 */
 	this.get_caret_line = function(){
-		var doc = cm.getDoc();
-		var pos = cm.getCursor();
-		var line = doc.getLine(pos.line);
+		let doc = cm.getDoc();
+		let pos = cm.getCursor();
+		let line = doc.getLine(pos.line);
 		return { text: line, pos: pos.ch };
 	};
 
@@ -794,7 +794,7 @@ var Shell = function( CodeMirror_, opts ){
 		
 		if( !this.function_tip ) this.function_tip = {};
 		if( text === this.function_tip.cached_tip ) return;
-		var where = cm.cursorCoords();
+		let where = cm.cursorCoords();
 		this.function_tip.cached_tip = text;
 		if( !this.function_tip.node ){
 			this.function_tip.container_node = document.createElement( "div" );
@@ -842,8 +842,8 @@ var Shell = function( CodeMirror_, opts ){
 		// dummy functions
 		opts.exec_function = opts.exec_function || function( cmd, callback ){
 			if( opts.debug ) console.info( "DUMMY" );
-			var ps = PARSE_STATUS.OK;
-			var err = null;
+			let ps = PARSE_STATUS.OK;
+			let err = null;
 			if( cmd.length ){
 				if( cmd[cmd.length-1].match( /_\s*$/)) ps = PARSE_STATUS.INCOMPLETE;
 			}
@@ -874,7 +874,7 @@ var Shell = function( CodeMirror_, opts ){
 		// FIXME: this doesn't need to be global, if we can box it up then require() it
 		cm = CodeMirror_( function(elt){opts.container.appendChild( elt ); }, cm_opts );
 
-		var inputfield = cm.getInputField();
+		let inputfield = cm.getInputField();
 
 		inputfield.addEventListener( "keydown", cacheEvent );
 		inputfield.addEventListener( "keyup", cacheEvent );
@@ -885,14 +885,14 @@ var Shell = function( CodeMirror_, opts ){
 	
 		if( !opts.suppress_initial_prompt ) set_prompt( opts.initial_prompt );
 		
-		var local_hint_function = null;
+		let local_hint_function = null;
 		if( opts.hint_function ){
 			local_hint_function = function( cm, callback ){
 
-				var doc = cm.getDoc();
-				var line = doc.getLine(doc.lastLine());
-				var pos = cm.getCursor();
-				var plen = prompt_len;
+				let doc = cm.getDoc();
+				let line = doc.getLine(doc.lastLine());
+				let pos = cm.getCursor();
+				let plen = prompt_len;
 
 				opts.hint_function.call( instance, line.substr(plen), pos.ch - plen, function( completions, position ){
 					if( !completions || !completions.length ){
@@ -912,10 +912,10 @@ var Shell = function( CodeMirror_, opts ){
 		cm.on( "cut", function( cm, e ){
 			if( state !== EXEC_STATE.EDIT ) e.preventDefault();
 			else {
-				var doc = cm.getDoc();
-				var start = doc.getCursor( "from" );
-				var end = doc.getCursor( "to" );
-				var line = doc.lastLine();
+				let doc = cm.getDoc();
+				let start = doc.getCursor( "from" );
+				let end = doc.getCursor( "to" );
+				let line = doc.lastLine();
 				if( start.line !== line 
 					|| end.line !== line 
 					|| start.ch < prompt_len 
@@ -925,10 +925,10 @@ var Shell = function( CodeMirror_, opts ){
 		});
 
 		cm.on( "cursorActivity", function(cm, e){
-			var pos = cm.getCursor();
-			var doc = cm.getDoc();
-			var lineno = doc.lastLine();
-			var lastline = doc.getLine( lineno );
+			let pos = cm.getCursor();
+			let doc = cm.getDoc();
+			let lineno = doc.lastLine();
+			let lastline = doc.getLine( lineno );
 			if( pos.line !== lineno || pos.ch < prompt_len ){
 				cm.setOption( "cursorBlinkRate", 0 );
 			}
@@ -942,8 +942,8 @@ var Shell = function( CodeMirror_, opts ){
 				
 		cm.on( "change", function( cm, e ){
 			if( e.origin && e.origin[0] === "+" ){
-				var doc = cm.getDoc();
-				var lastline = doc.lastLine();
+				let doc = cm.getDoc();
+				let lastline = doc.lastLine();
 				if( opts.tip_function ) opts.tip_function( doc.getLine( lastline ), e.from.ch + e.text.length );
 			}
 			else {
@@ -969,8 +969,8 @@ var Shell = function( CodeMirror_, opts ){
 
 			if( e.origin ){
 				
-				var doc = cm.getDoc();
-				var lastline = doc.lastLine();
+				let doc = cm.getDoc();
+				let lastline = doc.lastLine();
 
 				if( e.origin[0] === "+" ){
 					if( state === EXEC_STATE.EXEC ) e.cancel();
@@ -1072,9 +1072,9 @@ var Shell = function( CodeMirror_, opts ){
 			Left: function(cm){
 				if( event_cache ) return;
 
-				var pos = cm.getCursor();
-				var doc = cm.getDoc();
-				var lineno = doc.lastLine();
+				let pos = cm.getCursor();
+				let doc = cm.getDoc();
+				let lineno = doc.lastLine();
 
 				if( pos.line < lineno ){
 					doc.setSelection({ line: lineno, ch: doc.getLine(lineno).length });
@@ -1087,9 +1087,9 @@ var Shell = function( CodeMirror_, opts ){
 			Right: function(cm){
 				if( event_cache ) return;
 
-				var pos = cm.getCursor();
-				var doc = cm.getDoc();
-				var lineno = doc.lastLine();
+				let pos = cm.getCursor();
+				let doc = cm.getDoc();
+				let lineno = doc.lastLine();
 
 				if( pos.line < lineno ){
 					doc.setCursor({ line: lineno, ch: doc.getLine(lineno).length });
@@ -1105,9 +1105,9 @@ var Shell = function( CodeMirror_, opts ){
 			'Ctrl-Left': function(cm){
 				if( event_cache ) return;
 
-				var pos = cm.getCursor();
-				var doc = cm.getDoc();
-				var lineno = doc.lastLine();
+				let pos = cm.getCursor();
+				let doc = cm.getDoc();
+				let lineno = doc.lastLine();
 				if( pos.line < lineno ){
 					doc.setCursor({ line: lineno, ch: doc.getLine(lineno).length });
 				}
@@ -1120,9 +1120,9 @@ var Shell = function( CodeMirror_, opts ){
 			'Ctrl+Right': function(cm){
 				if( event_cache ) return;
 				
-				var pos = cm.getCursor();
-				var doc = cm.getDoc();
-				var lineno = doc.lastLine();
+				let pos = cm.getCursor();
+				let doc = cm.getDoc();
+				let lineno = doc.lastLine();
 				if( pos.line < lineno ){
 					doc.setCursor({ line: lineno, ch: doc.getLine(lineno).length });
 				}
@@ -1138,7 +1138,7 @@ var Shell = function( CodeMirror_, opts ){
 			Home: function(cm){
 				if( event_cache ) return;
 				
-				var doc = cm.getDoc();
+				let doc = cm.getDoc();
 				doc.setSelection({ line: doc.lastLine(), ch: prompt_len });
 			},
 
