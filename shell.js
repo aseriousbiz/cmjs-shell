@@ -681,24 +681,18 @@ let Shell = function( CodeMirror_, opts ){
 				lineno = cm.getDoc().lastLine();
 				
 				if( paste_buffer.length ){
+					let text = paste_buffer[0];
+					paste_buffer.splice(0,1);
+					doc.replaceRange( text, { line: lineno, ch: prompt_len }, undefined, "paste-continuation");
 					
-					setImmediate( function(){
-						let text = paste_buffer[0];
-						paste_buffer.splice(0,1);
-						doc.replaceRange( text, { line: lineno, ch: prompt_len }, undefined, "paste-continuation");
-						
-						// if the last line of the paste buffer is a newline, then exec.  
-						// otherwise enter the text on the line and play back cached events.
-						
-						if( paste_buffer.length ) exec_line(cm);
-						else playbackEvents();
-
-					});
+					// if the last line of the paste buffer is a newline, then exec.  
+					// otherwise enter the text on the line and play back cached events.
+					
+					if( paste_buffer.length ) exec_line(cm);
+					else playbackEvents();
 				}
 				else {
-					setImmediate( function(){
-						playbackEvents();
-					});
+					playbackEvents();
 				}
 				
 			});
@@ -1025,11 +1019,7 @@ let Shell = function( CodeMirror_, opts ){
 					e.text.splice(1);
 
 					// do the exec after CM has finished processing the change
-
-					setImmediate(function(){
-						exec_line( cm );
-					});
-
+					exec_line( cm );
 				}
 			}
 			// dev // else console.info( e.origin );
