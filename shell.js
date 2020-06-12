@@ -864,6 +864,7 @@
 				viewportMargin: 50
 			};
 			if( opts.inputStyle ) cm_opts.inputStyle = opts.inputStyle;
+			if( opts.lineWrapping) cm_opts.lineWrapping = opts.lineWrapping;
 	
 			// FIXME: this doesn't need to be global, if we can box it up then require() it
 			cm = CodeMirror_( function(elt){opts.container.appendChild( elt ); }, cm_opts );
