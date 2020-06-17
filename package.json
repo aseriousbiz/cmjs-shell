@@ -1,12 +1,12 @@
 {
 	"name": "cmjs-shell",
-	"version": "0.3.10",
+	"version": "0.3.11",
 	"license": "MIT",
 	"description": "Command shell based on CodeMirror.",
 	"keywords": ["shell", "console"],
 	"repository": {
 		"type" : "git",
-		"url" : "https://github.com/sdllc/cmjs-shell.git"
+		"url" : "https://github.com/pmn/cmjs-shell.git"
 	},
 	"main": "shell.js"
 }
