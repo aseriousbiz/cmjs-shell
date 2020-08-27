@@ -587,6 +587,24 @@
 		this.prompt = function( text, className, is_continuation ){
 			set_prompt( text, className, is_continuation );	
 		};
+
+		/**
+		 * external function to replace the existing prompt in place. This is useful 
+		 * when the prompt needs to be synchronized with some other info. For example, 
+		 * if you wanted the current time in the prompt. This assumes the prompt is 
+		 * set in one form or another.
+		 * @param {string} text - the new prompt text.
+		 */
+		this.replacePrompt = function(text) {
+			const existing = instance.opts.initial_prompt || instance.opts.default_prompt;
+			let doc = cm.getDoc();
+			let lineno = doc.lastLine();
+			let lastline = cm.getLine(lineno);
+
+			doc.replaceRange( text, { line: lineno, ch: 0 }, { line: lineno, ch: existing.length }, "prompt" );
+			
+			instance.opts.initial_prompt = text;
+		}
 	
 		/**
 		 * for external client that wants to execute a block of code with
