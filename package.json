@@ -6,7 +6,7 @@
 	"keywords": ["shell", "console"],
 	"repository": {
 		"type" : "git",
-		"url" : "https://github.com/pmn/cmjs-shell.git"
+		"url" : "https://github.com/aseriousbiz/cmjs-shell.git"
 	},
 	"main": "shell.js"
 }
