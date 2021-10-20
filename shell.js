@@ -385,7 +385,7 @@
 		 * style applied to the block.  "unstyled", if set, prevents language 
 		 * styling on the block.
 		 */
-		this.response = function(text, className, unstyled){
+		this.response = function(text, className, unstyled, no_scroll) {
 	
 			let doc = cm.getDoc();
 			let lineno = doc.lastLine();
@@ -481,9 +481,7 @@
 				});
 			}
 	
-			// don't scroll in exec mode, on the theory that (1) we might get
-			// more messages, and (2) we'll scroll when we enter the caret
-			//if( state !== EXEC_STATE.EXEC )
+			if( !no_scroll )
 			{
 				cm.scrollIntoView({line: doc.lastLine(), ch: endch});
 			}
@@ -546,7 +544,7 @@
 		/**
 		 * set prompt with optional class
 		 */
-		function set_prompt( text, prompt_class, is_continuation ){
+		function set_prompt( text, prompt_class, is_continuation, no_scroll ){
 			
 			if( typeof prompt_class === "undefined" )
 				prompt_class = DEFAULT_PROMPT_CLASS;
@@ -573,8 +571,10 @@
 				});
 			}
 					
-			doc.setSelection({ line: lineno, ch: prompt_len });
-			cm.scrollIntoView({line: lineno, ch: prompt_len });
+			doc.setSelection({ line: lineno, ch: prompt_len }, null, {scroll: !no_scroll});
+			if ( !no_scroll ) {
+				cm.scrollIntoView({line: lineno, ch: prompt_len });
+			}
 	
 		}
 	
@@ -584,8 +584,8 @@
 		 * hence we need an initialized console) before we know what the correct
 		 * prompt is.
 		 */
-		this.prompt = function( text, className, is_continuation ){
-			set_prompt( text, className, is_continuation );	
+		this.prompt = function( text, className, is_continuation, no_scroll ){
+			set_prompt( text, className, is_continuation, no_scroll );	
 		};
 
 		/**
@@ -895,8 +895,8 @@
 			inputfield.addEventListener( "char", cacheEvent );
 	
 			// if you suppress the initial prompt, you must call the "prompt" method 
-		
-			if( !opts.suppress_initial_prompt ) set_prompt( opts.initial_prompt );
+
+			if( !opts.suppress_initial_prompt ) set_prompt( opts.initial_prompt, null, null, opts.suppress_initial_scroll );
 			
 			let local_hint_function = null;
 			if( opts.hint_function ){
